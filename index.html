@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Be My Valentine? 💖</title>
+    <meta name="description" content="A cute, funny little site to ask you to be my Valentine." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="icon" href="assets/heart.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="site-locked">
+    <div id="hearts-bg" aria-hidden="true"></div>
+    <!-- Gate mini‑game overlay -->
+    <div id="gate" class="gate" aria-modal="true" role="dialog" aria-label="Unlock the surprise">
+      <div class="gate-card">
+        <h2 class="gate-title">London Taxi Dash 🚕💘</h2>
+        <canvas id="gateCanvas" width="900" height="520" aria-label="heart catch game"></canvas>
+        <div class="gate-ui">
+          <button id="gateStart" class="btn yes">Start</button>
+          <div class="gate-status" id="gateStatus"></div>
+        </div>
+        <!-- Gate intro bottom sheet -->
+        <div id="gateIntro" class="gate-intro" role="region" aria-label="How to play">
+          <div class="intro-content">
+            <img id="introAvatar" class="intro-avatar" src="assets/heart.svg" alt="me" />
+            <div class="intro-bubble">
+              <p class="intro-title">Before we begin…</p>
+              <p class="intro-text">Drive the London taxi with arrow keys (or drag on mobile). Collect <strong>7 hearts</strong> in <strong>30s</strong>. Watch out for pigeons — they’re cheeky! Unlock to see my surprise. 💘</p>
+              <button id="introOk" class="btn yes small">Got it!</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="container">
+        <h1 class="logo">💕 For You</h1>
+        <button id="musicToggle" class="music-toggle" aria-label="Toggle background music" title="Play music" data-src="assets/Dave-Raindance-Ft-Tems-(HipHopKit.com).mp3">♪</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero container" id="hero">
+        <img class="hero-emoji" src="assets/heart.svg" alt="heart" />
+        <h2 class="title">Will you be my Valentine?</h2>
+        <p class="subtitle">I checked the forecast: 100% chance of us being adorable. 🐻💘</p>
+        <div class="cta-row">
+          <button id="yesBtn" class="btn yes">Yes</button>
+          <button id="noBtn" class="btn no" aria-label="No (but it's sneaky)">No</button>
+        </div>
+        <p class="micro-hint">P.S. the "No" button is shy.</p>
+      </section>
+
+      <!-- Lightbox for enlarged photo -->
+      <div id="lightbox" class="lightbox" aria-hidden="true" role="dialog" aria-label="Photo viewer">
+        <button id="lbClose" class="lb-close" aria-label="Close">✕</button>
+        <div class="lb-inner">
+          <img id="lbImg" alt="enlarged" />
+          <div id="lbCap" class="lb-cap"></div>
+          <div class="lb-arrows">
+            <button id="lbPrev" class="lb-arrow" aria-label="Previous">◀</button>
+            <button id="lbNext" class="lb-arrow" aria-label="Next">▶</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="london-banner post-yes" id="london" aria-label="London banner">
+        <div class="container">
+          <h3 class="london-title">It all began in London 🇬🇧</h3>
+          <p class="subtitle">Where two strangers felt a little extra magic under cloudy skies.</p>
+          <div class="skyline" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section class="stats container post-yes" id="stats">
+        <div class="stat-card">
+          <div class="stat-number" id="daysTogether">0</div>
+          <div class="stat-label">days of us</div>
+        </div>
+      </section>
+
+      <section class="storybook container post-yes" id="story">
+        <h3>Our little story</h3>
+        <div class="book" aria-label="flipbook">
+          <button class="nav prev" id="prevPage" aria-label="Previous">‹</button>
+          <div class="pages" id="pages">
+            <article class="page">
+              <h4>Chapter 1 — A city called <span class="city">London</span></h4>
+              <p>Somewhere under a cloudy sky, two strangers crossed paths. One look, and time did that slow-motion thing.</p>
+            </article>
+            <article class="page">
+              <h4>Chapter 2 — The quiet heart</h4>
+              <p>I tried to play it cool, but I was shy and starstruck. Still, I couldn’t stop thinking about you.</p>
+            </article>
+            <article class="page">
+              <h4>Chapter 3 — 11pm texts</h4>
+              <p>That night, I sent a message. Then another. Then we discovered we talk in our own language.</p>
+            </article>
+            <article class="page">
+              <h4>Chapter 4 — Suddenly, us</h4>
+              <p>Days turned into plans, plans into memories. One month later, I’m here asking a simple question...</p>
+            </article>
+          </div>
+          <button class="nav next" id="nextPage" aria-label="Next">›</button>
+        </div>
+        <div class="dots" id="pageDots" aria-label="Page indicators"></div>
+      </section>
+
+      <section class="carousel container post-yes" id="photoCarousel" role="listbox" aria-label="Heart path carousel">
+        <h3>A few memories we made</h3>
+        <h4 class="subnote">(Ps. More to come)</h4>
+        <p class="subtitle">Hover or drag to explore. The closest photo grows with a soft heart glow.</p>
+        <div class="carousel-stage">
+          <div id="carouselTrack" class="carousel-track" aria-live="polite"></div>
+        </div>
+        <div class="carousel-ctrls">
+          <button id="carPrev" class="btn ghost" aria-label="Previous">◀</button>
+          <button id="carNext" class="btn ghost" aria-label="Next">▶</button>
+        </div>
+        <p class="micro-hint">Photos come from <code>galleryImages</code> in <code>script.js</code>.</p>
+      </section>
+
+      <section id="celebration" class="celebration container post-yes" hidden>
+        <h3>Yay! Best decision ever! 🎉</h3>
+        <p>Prepare for excessive cuddles, cheesy jokes, and a lifetime supply of snacks.</p>
+        <button id="replayBtn" class="btn ghost">Replay hearts</button>
+      </section>
+
+      <section class="gallery container post-yes" id="gallery">
+        <h3>Our cute memories</h3>
+        <p class="subtitle">Add your own photos in <code>assets/images/</code> and list them in <code>script.js</code>.</p>
+        <div class="grid" id="galleryGrid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>Made with too much love and not enough chill 💗</p>
+      </div>
+    </footer>
+
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+    <script src="script.js"></script>
+  </body>
+</html>
