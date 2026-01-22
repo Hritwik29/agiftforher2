@@ -24,6 +24,28 @@
           <button id="gateStart" class="btn yes">Start</button>
           <div class="gate-status" id="gateStatus"></div>
         </div>
+
+    <!-- Explore modal shown after train finishes -->
+    <div id="explorePrompt" class="song-prompt" aria-modal="true" role="dialog" aria-label="More to explore" style="display:none">
+      <div class="prompt-card">
+        <p class="prompt-text"><strong>More to explore...</strong></p>
+        <p class="prompt-text">Together for <span id="liveTogether">—</span></p>
+        <div class="prompt-actions">
+          <button id="exploreClose" class="btn yes">Keep exploring</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Song prompt modal shown after game success -->
+    <div id="songPrompt" class="song-prompt" aria-modal="true" role="dialog" aria-label="Play a song?" style="display:none">
+      <div class="prompt-card">
+        <p class="prompt-text">Before we start... I want to play you a song that’s close to your heart. 💗</p>
+        <div class="prompt-actions">
+          <button id="songYes" class="btn yes">Yes</button>
+          <button id="songDefYes" class="btn no">Definitely yes</button>
+        </div>
+      </div>
+    </div>
         <!-- Gate intro bottom sheet -->
         <div id="gateIntro" class="gate-intro" role="region" aria-label="How to play">
           <div class="intro-content">
@@ -49,12 +71,10 @@
       <section class="hero container" id="hero">
         <img class="hero-emoji" src="assets/heart.svg" alt="heart" />
         <h2 class="title">Will you be my Valentine?</h2>
-        <p class="subtitle">I checked the forecast: 100% chance of us being adorable. 🐻💘</p>
         <div class="cta-row">
           <button id="yesBtn" class="btn yes">Yes</button>
           <button id="noBtn" class="btn no" aria-label="No (but it's sneaky)">No</button>
         </div>
-        <p class="micro-hint">P.S. the "No" button is shy.</p>
       </section>
 
       <!-- Lightbox for enlarged photo -->
@@ -75,24 +95,54 @@
           <h3 class="london-title">It all began in London 🇬🇧</h3>
           <p class="subtitle">Where two strangers felt a little extra magic under cloudy skies.</p>
           <div class="skyline" aria-hidden="true"></div>
+          <!-- Mini map of our spots -->
+          <div class="mini-map" id="miniMap" aria-label="Our London spots">
+            <div class="map-rail"></div>
+            <div class="progress" id="mapProgress" aria-hidden="true"></div>
+            <div class="train" id="tubeTrain" aria-hidden="true" title="Our little tube">
+              <div class="car engine"><span class="chimney"></span></div>
+              <div class="car"></div>
+              <div class="car"></div>
+            </div>
+            <button class="pin" data-name="Nordic Bar" data-src="assets/images/places/nordic-bar.jpg" style="--x:8%">
+              <span>Nordic Bar</span>
+            </button>
+            <button class="pin" data-name="Albert Schloss" data-src="assets/images/places/albert-schloss.jpg" style="--x:22%">
+              <span>Albert Schloss</span>
+            </button>
+            <button class="pin" data-name="Chapter London Bridge" data-src="assets/images/places/chapter-london-bridge.jpg" style="--x:38%">
+              <span>Chapter London Bridge</span>
+            </button>
+            <button class="pin" data-name="Hyde Park Winter Wonderland" data-src="assets/images/places/winter-wonderland.jpg" style="--x:54%">
+              <span>Winter Wonderland</span>
+            </button>
+            <button class="pin" data-name="Marlin Apartments" data-src="assets/images/places/marlin-apartments.jpg" style="--x:68%">
+              <span>Marlin Apartments</span>
+            </button>
+            <button class="pin" data-name="Camden Market" data-src="assets/images/places/camden-market.jpg" style="--x:82%">
+              <span>Camden Market</span>
+            </button>
+            <button class="pin" data-name="Vault Tower Bridge" data-src="assets/images/places/vault-tower-bridge.jpg" style="--x:94%">
+              <span>Vault Tower Bridge</span>
+            </button>
+          </div>
         </div>
       </section>
 
       <section class="stats container post-yes" id="stats">
         <div class="stat-card">
-          <div class="stat-number" id="daysTogether">0</div>
-          <div class="stat-label">days of us</div>
+          <div class="stat-number together" data-live-together>0d 00:00:00.000</div>
         </div>
       </section>
 
       <section class="storybook container post-yes" id="story">
-        <h3>Our little story</h3>
+        <h3>Our Infamous Lore</h3>
         <div class="book" aria-label="flipbook">
           <button class="nav prev" id="prevPage" aria-label="Previous">‹</button>
           <div class="pages" id="pages">
             <article class="page">
               <h4>Chapter 1 — A city called <span class="city">London</span></h4>
-              <p>Somewhere under a cloudy sky, two strangers crossed paths. One look, and time did that slow-motion thing.</p>
+              <p>it was so unexpected to meet a person like you on this london trip and i will be forever greatful for that . have to say its gotta be one of the most intresting and fun london tripo ever iykyk</p>
             </article>
             <article class="page">
               <h4>Chapter 2 — The quiet heart</h4>
@@ -141,7 +191,7 @@
 
     <footer class="site-footer">
       <div class="container">
-        <p>Made with too much love and not enough chill 💗</p>
+        <p></p>
       </div>
     </footer>
 

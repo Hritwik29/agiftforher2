@@ -51,6 +51,122 @@ function createEl(tag, props={}){ const el = document.createElement(tag); Object
   });
 })();
 
+// Mini-map train animation through our stops
+(function miniMap(){
+  const map = document.getElementById('miniMap');
+  if(!map) return;
+  const rail = map.querySelector('.map-rail');
+  const train = document.getElementById('tubeTrain');
+  const progress = document.getElementById('mapProgress');
+  const pins = Array.from(map.querySelectorAll('.pin'));
+  if(!rail || !train || !progress || !pins.length) return;
+  const explore = document.getElementById('explorePrompt');
+  const exploreClose = document.getElementById('exploreClose');
+
+  let stops = [];
+  let playing = false;
+  let rafId = null;
+
+  function layout(){
+    const rr = rail.getBoundingClientRect();
+    const mr = map.getBoundingClientRect();
+    stops = pins.map(p=>({ el:p, x: p.getBoundingClientRect().left + p.offsetWidth/2 }));
+    stops.sort((a,b)=> a.x - b.x);
+    // Convert absolute x to relative within rail
+    stops = stops.map(s=> ({ el: s.el, x: s.x - rr.left }));
+    // Place train at start
+    train.style.left = (rr.left - mr.left + 0) + 'px';
+    train.style.transform = 'translate(-50%,-50%)';
+    progress.style.width = '0px';
+  }
+
+  function burstAt(el){
+    const wrap = document.createElement('div');
+    wrap.className = 'burst';
+    map.appendChild(wrap);
+    const pr = el.getBoundingClientRect();
+    const mr = map.getBoundingClientRect();
+    wrap.style.left = (pr.left - mr.left + pr.width/2) + 'px';
+    for(let i=0;i<10;i++){
+      const p = document.createElement('i');
+      p.className = 'piece';
+      p.style.background = ['#ff4f8b','#ff87b7','#ffa6c9','#ffd6e6'][i%4];
+      const ang = Math.random()*Math.PI*2; const r = 24 + Math.random()*26;
+      p.style.setProperty('--dx', Math.cos(ang)*r + 'px');
+      p.style.setProperty('--dy', Math.sin(ang)*r + 'px');
+      p.style.left = '0px'; p.style.top = '0px';
+      wrap.appendChild(p);
+      setTimeout(()=> p.remove(), 650);
+    }
+    setTimeout(()=> wrap.remove(), 700);
+  }
+
+  function ease(t){ return 1 - Math.pow(1-t, 3); }
+
+  async function moveTo(targetX){
+    return new Promise(resolve=>{
+      const rr = rail.getBoundingClientRect();
+      const mr = map.getBoundingClientRect();
+      const startLeft = parseFloat(progress.style.width) || 0;
+      const endLeft = Math.max(0, Math.min(targetX, rr.width));
+      const dist = Math.abs(endLeft - startLeft);
+      // slower train: larger base duration and factor
+      const dur = Math.max(900, Math.min(2800, dist*7));
+      const t0 = performance.now();
+      cancelAnimationFrame(rafId);
+      function step(now){
+        const t = Math.min(1, (now - t0)/dur);
+        const e = ease(t);
+        const x = startLeft + (endLeft - startLeft)*e;
+        progress.style.width = x + 'px';
+        train.style.left = (rail.getBoundingClientRect().left - mr.left + x) + 'px';
+        if(t < 1){ rafId = requestAnimationFrame(step); }
+        else resolve();
+      }
+      rafId = requestAnimationFrame(step);
+    });
+  }
+
+  async function play(){
+    if(playing) return; playing = true;
+    train.classList.add('bob');
+    pins.forEach(p=> p.classList.remove('hit'));
+    layout();
+    for(const s of stops){
+      await moveTo(s.x);
+      s.el.classList.add('hit');
+      burstAt(s.el);
+    }
+    playing = false;
+    train.classList.remove('bob');
+    if(explore){
+      explore.style.display = 'flex';
+      explore.setAttribute('aria-hidden','false');
+    }
+  }
+
+  // Autoplay when section comes into view
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ play(); }
+    });
+  }, {threshold: 0.4});
+  io.observe(map);
+
+  // Resize handling
+  addEventListener('resize', ()=>{ if(!playing){ layout(); } });
+
+  // Tap to replay
+  map.addEventListener('click', ()=>{ if(!playing) play(); });
+
+  // Explore close
+  exploreClose?.addEventListener('click', ()=>{
+    if(!explore) return;
+    explore.style.display = 'none';
+    explore.setAttribute('aria-hidden','true');
+  });
+})();
+
 // Background music toggle with fade in/out
 (function music(){
   const btn = document.getElementById('musicToggle');
@@ -100,6 +216,9 @@ function createEl(tag, props={}){ const el = document.createElement(tag); Object
   const intro = document.getElementById('gateIntro');
   const introOk = document.getElementById('introOk');
   const introAvatar = document.getElementById('introAvatar');
+  const songPrompt = document.getElementById('songPrompt');
+  const songYes = document.getElementById('songYes');
+  const songDefYes = document.getElementById('songDefYes');
   if(!gate || !canvas || !startBtn) return;
 
   document.body.classList.add('gated');
@@ -169,6 +288,8 @@ function createEl(tag, props={}){ const el = document.createElement(tag); Object
     ctx.fillStyle='#fff'; ctx.fillRect(-6,-12,12,6); ctx.strokeRect(-6,-12,12,6);
     // wheels
     ctx.fillStyle='#333'; ctx.fillRect(-16,-8,4,16); ctx.fillRect(12,-8,4,16);
+    // center marker (aim point)
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(0,0,2,0,Math.PI*2); ctx.fill();
     ctx.restore();
   }
   function drawPigeon(p){
@@ -234,7 +355,36 @@ function createEl(tag, props={}){ const el = document.createElement(tag); Object
     cancelAnimationFrame(animId); animId = requestAnimationFrame(loop);
   }
   function end(){ cancelAnimationFrame(animId); statusEl.textContent = 'Out of time! One more try?'; }
-  function unlock(){ cancelAnimationFrame(animId); gate.style.display='none'; document.body.classList.remove('gated'); }
+  function unlock(){
+    cancelAnimationFrame(animId);
+    // Hide the game canvas/UI and show the song prompt modal
+    if(songPrompt){
+      songPrompt.style.display = 'flex';
+      songPrompt.setAttribute('aria-hidden','false');
+      // Hook up buttons once
+      const onChoose = async ()=>{
+        try{
+          // Start music via the existing toggle button (ensures correct source)
+          const btn = document.getElementById('musicToggle');
+          if(btn && !btn.classList.contains('active')){ btn.click(); }
+        }catch(e){ /* ignore */ }
+        // Hide prompt and reveal the hero
+        songPrompt.style.display = 'none';
+        songPrompt.setAttribute('aria-hidden','true');
+        gate.style.display='none';
+        document.body.classList.remove('gated');
+        // Ensure hero is in view
+        const hero = document.getElementById('hero');
+        hero?.scrollIntoView({behavior:'smooth', block:'start'});
+      };
+      songYes?.addEventListener('click', onChoose, {once:true});
+      songDefYes?.addEventListener('click', onChoose, {once:true});
+    } else {
+      // Fallback: just close gate
+      gate.style.display='none';
+      document.body.classList.remove('gated');
+    }
+  }
 
   // input
   addEventListener('keydown', e=>{ if(e.key in keys){ keys[e.key]=true; }});
@@ -846,4 +996,35 @@ function createEl(tag, props={}){ const el = document.createElement(tag); Object
   const start = getStartDate();
   const days = calcDays(start);
   if(daysEl) daysEl.textContent = String(days);
+})();
+
+// Live together counter (DD HH:MM:SS.mmm)
+(function liveTogether(){
+  const outs = Array.from(document.querySelectorAll('[data-live-together], #liveTogether'));
+  if(!outs.length) return;
+  function parseStartDate(str){
+    if(!str) return null;
+    let d = new Date(str + 'T00:00:00');
+    if(!isNaN(d)) return d;
+    const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(m){ const [, dd, mm, yyyy] = m; d = new Date(Number(yyyy), Number(mm)-1, Number(dd)); if(!isNaN(d)) return d; }
+    return null;
+  }
+  const start = (function(){
+    const p = parseStartDate(CONFIG.startDate);
+    if(p) return p;
+    const d = new Date(); d.setDate(d.getDate()-30); return d;
+  })();
+  function pad(n, w=2){ return String(n).padStart(w,'0'); }
+  function tick(){
+    const now = new Date();
+    let ms = now - start; if(ms < 0) ms = 0;
+    const days = Math.floor(ms / 86400000); ms -= days*86400000;
+    const hrs = Math.floor(ms / 3600000); ms -= hrs*3600000;
+    const mins = Math.floor(ms / 60000); ms -= mins*60000;
+    const secs = Math.floor(ms / 1000); ms -= secs*1000;
+    const text = `${days} days, ${hrs} hours, ${mins} minutes, ${secs} seconds, ${pad(ms,3)} milliseconds of us being together`;
+    outs.forEach(el => el.textContent = text);
+  }
+  tick(); setInterval(tick, 100);
 })();

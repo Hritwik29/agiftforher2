@@ -79,10 +79,42 @@ body{
     linear-gradient(0deg, rgba(0,0,0,.15) 0 60%, transparent 60%);
 }
 
+/* Mini map of London spots */
+.mini-map{position:relative; margin:14px auto 6px; padding:18px 10px 26px; border-radius:14px; background:var(--card); box-shadow:var(--shadow)}
+.mini-map .map-rail{position:absolute; left:12px; right:12px; top:50%; height:10px; background:linear-gradient(90deg,#ffe9f3,#fff); border-radius:999px; box-shadow: inset 0 2px 6px rgba(0,0,0,.06)}
+.mini-map .progress{position:absolute; left:12px; top:50%; height:10px; width:0; transform:translateY(-50%); background:linear-gradient(90deg,var(--hot),var(--pink)); border-radius:999px; box-shadow:0 2px 10px rgba(255,79,139,.25)}
+.mini-map .train{position:absolute; top:50%; left:12px; transform:translate(-50%,-50%); display:flex; gap:4px; height:22px; background:transparent; box-shadow:0 6px 14px rgba(27,108,242,.18)}
+.mini-map .train .car{width:28px; height:18px; background:#f2f6ff; border:2px solid #1b6cf2; border-radius:4px; position:relative; overflow:hidden}
+.mini-map .train .car:before{content:""; position:absolute; left:3px; right:3px; top:4px; height:7px; background:linear-gradient(90deg,#1b6cf2 0 22%, #bbd0ff 22% 48%, #1b6cf2 48% 70%, #bbd0ff 70% 100%); border-radius:2px}
+.mini-map .train .car:after{content:""; position:absolute; left:6px; right:6px; bottom:-5px; height:10px; background:radial-gradient(circle at 0 50%, #333 3px, #0000 4px) 0 0/50% 100% no-repeat, radial-gradient(circle at 100% 50%, #333 3px, #0000 4px) 100% 0/50% 100% no-repeat}
+.mini-map .train .engine{border-top-left-radius:10px; border-bottom-left-radius:10px}
+.mini-map .train .engine .chimney{position:absolute; width:6px; height:8px; left:-3px; top:-6px; background:#1b6cf2; border-radius:2px}
+.mini-map .train.bob{animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,-50%) translateY(0)} 50%{transform:translate(-50%,-50%) translateY(-1px)}}
+.mini-map .pin{position:absolute; top:50%; transform:translate(calc(var(--x) - 50%), -50%); left:var(--x); appearance:none; border:none; background:transparent; cursor:pointer}
+.mini-map .pin::before{content:""; display:block; width:14px; height:14px; background:var(--hot); transform:rotate(45deg); border-radius:3px 50% 50% 50%; box-shadow:0 6px 14px rgba(255,79,139,.35)}
+.mini-map .pin span{position:absolute; top:-28px; left:50%; transform:translateX(-50%); white-space:nowrap; background:#fff; color:var(--text); font-size:12px; padding:3px 6px; border-radius:999px; box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.mini-map .pin:focus-visible span{outline:2px solid var(--pink)}
+/* Celebrate a stop */
+.mini-map .pin.hit::before{animation:pop 420ms ease}
+.mini-map .pin.hit span{animation:floatUp 600ms ease}
+@keyframes pop{0%{transform:rotate(45deg) scale(1)} 40%{transform:rotate(45deg) scale(1.4)} 100%{transform:rotate(45deg) scale(1)}}
+
+/* Confetti burst */
+.mini-map .burst{position:absolute; top:50%; transform:translateY(-50%); pointer-events:none}
+.mini-map .piece{position:absolute; width:6px; height:6px; border-radius:50%; opacity:0; animation:burstMove 600ms ease-out forwards}
+@keyframes burstMove{0%{transform:translate(0,0) scale(1); opacity:1} 100%{transform:translate(var(--dx), var(--dy)) scale(0.8); opacity:0}}
+
+@media (max-width:700px){
+  .mini-map{padding:16px 8px 24px}
+  .mini-map .pin span{font-size:11px}
+}
+
 /* Stats */
 .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin:14px auto 24px}
 .stat-card{background:var(--card); border-radius:16px; padding:18px; text-align:center; box-shadow:var(--shadow)}
 .stat-number{font-family:'Baloo 2', cursive; font-size:40px; color:var(--hot); line-height:1}
+.stat-live{margin-top:6px; color:var(--muted); font-size:13px}
 .stat-label{color:var(--muted)}
 
 /* Story timeline */
@@ -247,3 +279,10 @@ body.gated{overflow:hidden}
 .intro-title{margin:0 0 4px; font-weight:700}
 .intro-text{margin:0 0 8px}
 .btn.small{padding:10px 14px; font-size:14px}
+
+/* Song prompt modal */
+.song-prompt{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:65; background:rgba(0,0,0,.35); backdrop-filter: blur(2px)}
+.song-prompt[aria-hidden="false"], .song-prompt.show{display:flex}
+.prompt-card{background:#fff; border-radius:16px; padding:16px; box-shadow:0 20px 60px rgba(0,0,0,.25); width:min(92vw,520px); text-align:center}
+.prompt-text{margin:4px 0 12px; color:var(--text)}
+.prompt-actions{display:flex; gap:12px; justify-content:center}
